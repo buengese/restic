@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
+	"fmt"
 
 	"github.com/restic/restic/internal/restic"
 )
@@ -40,10 +41,12 @@ func DefaultLoad(ctx context.Context, h restic.Handle, length int, offset int64,
 	fn func(rd io.Reader) error) error {
 	rd, err := openReader(ctx, h, length, offset)
 	if err != nil {
+		fmt.Printf("DefaultLoad: openReader error: %+v\n", err)
 		return err
 	}
 	err = fn(rd)
 	if err != nil {
+		fmt.Printf("DefaultLoad: consumer error: %+v\n", err)
 		rd.Close() // ignore secondary errors closing the reader
 		return err
 	}

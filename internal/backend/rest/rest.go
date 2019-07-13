@@ -212,6 +212,7 @@ func (b *Backend) openReader(ctx context.Context, h restic.Handle, length int, o
 			_, _ = io.Copy(ioutil.Discard, resp.Body)
 			_ = resp.Body.Close()
 		}
+		fmt.Printf("openReader: http.do error: %+v\n", err)
 		return nil, errors.Wrap(err, "client.Do")
 	}
 

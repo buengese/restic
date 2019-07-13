@@ -717,6 +717,13 @@ func DownloadAndHash(ctx context.Context, be Loader, h restic.Handle) (tmpfile *
 		}
 		hrd := hashing.NewReader(rd, sha256.New())
 		size, ierr = io.Copy(tmpfile, hrd)
+		if ierr != nil {
+			fmt.Printf("DownloadAndHash consumer: io.Copy err: %+v\n")
+		}
+		if size == 0 {
+			fmt.Printf("DownloadAndHash consumer: io.Copy: zero bytes copied. treating as error\n")
+			return errors.New("zero bytes received")
+		}
 		hash = restic.IDFromHash(hrd.Sum(nil))
 		return ierr
 	})
