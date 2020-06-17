@@ -62,6 +62,7 @@ type GlobalOptions struct {
 
 	LimitUploadKb   int
 	LimitDownloadKb int
+	BackendRetries  int
 
 	ctx      context.Context
 	password string
@@ -111,6 +112,7 @@ func init() {
 	f.BoolVar(&globalOptions.CleanupCache, "cleanup-cache", false, "auto remove old cache directories")
 	f.IntVar(&globalOptions.LimitUploadKb, "limit-upload", 0, "limits uploads to a maximum rate in KiB/s. (default: unlimited)")
 	f.IntVar(&globalOptions.LimitDownloadKb, "limit-download", 0, "limits downloads to a maximum rate in KiB/s. (default: unlimited)")
+	f.IntVar(&globalOptions.BackendRetries, "backen-retries", 10, "number of times backend operations should be retried in case of failure (default: 10)")
 	f.StringSliceVarP(&globalOptions.Options, "option", "o", []string{}, "set extended option (`key=value`, can be specified multiple times)")
 
 	restoreTerminal()
@@ -391,7 +393,7 @@ func OpenRepository(opts GlobalOptions) (*repository.Repository, error) {
 		return nil, err
 	}
 
-	be = backend.NewRetryBackend(be, 10, func(msg string, err error, d time.Duration) {
+	be = backend.NewRetryBackend(be, opts.BackendRetries, func(msg string, err error, d time.Duration) {
 		Warnf("%v returned error, retrying after %v: %v\n", msg, d, err)
 	})
 
